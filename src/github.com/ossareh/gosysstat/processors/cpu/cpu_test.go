@@ -65,12 +65,12 @@ func makeTestStats() []core.Stat {
 	return stats
 }
 
-func TestProcessBytes(t *testing.T) {
+func TestProcessData(t *testing.T) {
 	fixture_bytes, err := ioutil.ReadFile("./cpu_stat.example")
 	if err != nil {
 		t.Error(err)
 	}
-	stats := ProcessBytes(string(fixture_bytes))
+	stats := ProcessData(string(fixture_bytes))
 	expectedStats := makeTestStats()
 	if len(stats) != len(expectedStats) {
 		t.Error("%v != %v", stats, expectedStats)

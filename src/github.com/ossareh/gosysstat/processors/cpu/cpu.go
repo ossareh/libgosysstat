@@ -36,7 +36,7 @@ func makeCpuValuesMap(input []int64) map[string]int64 {
 		"io":   input[4]}
 }
 
-func ProcessBytes(data string) []core.Stat {
+func ProcessData(data string) []core.Stat {
 	// TODO: improve
 	stats := make([]core.Stat, 0)
 	context := "CPU"

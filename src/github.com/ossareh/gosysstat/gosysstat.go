@@ -13,7 +13,7 @@ func main() {
 
 	// fetch /proc/stat (cpu)
 	cpuStats := make(chan *[]core.Stat)
-	go core.StatProcessor(cpu.StatFile, cpu.ProcessBytes, cpuStats)
+	go core.StatProcessor(cpu.StatFile, cpu.ProcessData, cpuStats)
 	for {
 		select {
 		case c := <-cpuStats:
