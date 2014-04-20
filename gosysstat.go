@@ -2,21 +2,26 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/ossareh/gosysstat/core"
-	"github.com/ossareh/gosysstat/processors/cpu"
+	"github.com/ossareh/gosysstat/processor/cpu"
 )
 
 func main() {
 	// fetch /proc/diskstats (disk)
 	// fetch /proc/meminfo (mem)
 
-	// fetch /proc/stat (cpu)
-	cpuStats := make(chan *[]core.Stat)
-	go core.StatProcessor(cpu.StatFile, cpu.ProcessData, cpuStats)
+	cpuStatProcessor, err := cpu.NewProcessor("/proc/stat")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	cpuStatResults := make(chan *[]core.Stat)
+
+	go core.StatProcessor(cpuStatProcessor, cpuStatResults)
 	for {
 		select {
-		case c := <-cpuStats:
+		case c := <-cpuStatResults:
 			fmt.Println(c)
 		}
 	}

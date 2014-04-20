@@ -1,34 +1,28 @@
 package core
 
-import (
-	"io/ioutil"
-	"time"
-)
+import "time"
 
 type Stat struct {
 	Type   string
-	Aspect string
-	Values map[string]int64
+	Values []int64
 }
 
-type FileProcessor func(string) []Stat
-
-func readFile(filename string) []byte {
-	b, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic(err)
-	}
-	return b
+type ResultProcessor interface {
+	Process() ([]Stat, error)
 }
 
-func StatProcessor(filename string, processor FileProcessor, c chan *[]Stat) {
+func StatProcessor(processor ResultProcessor, c chan *[]Stat) {
 	tick := time.Tick(1 * time.Second)
 	for {
 		select {
 		case <-tick:
-			data := string(readFile(filename))
-			stats := processor(data)
-			c <- &stats
+			d, err := processor.Process()
+			if err == nil {
+				c <- &d
+			} else {
+				// TODO: Dont Panic!
+				panic(err)
+			}
 		}
 	}
 }
