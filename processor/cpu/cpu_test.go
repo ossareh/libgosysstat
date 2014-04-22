@@ -57,7 +57,7 @@ func TestCpuProcessor(t *testing.T) {
 		}
 		for subIdx, val := range stat.Values {
 			if val != results[idx].Values[subIdx] {
-				s := fmt.Sprintf("Stat Value mismatch (item:%d, val: %d)",
+				s := fmt.Sprintf("Stat Value mismatch (item:%d, val:%d)",
 					idx, subIdx)
 				t.Fatalf(s, val, results[idx].Values[subIdx])
 			}

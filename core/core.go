@@ -1,6 +1,9 @@
 package core
 
-import "time"
+import (
+	"log"
+	"time"
+)
 
 type Stat struct {
 	Type   string
@@ -11,8 +14,8 @@ type ResultProcessor interface {
 	Process() ([]Stat, error)
 }
 
-func StatProcessor(processor ResultProcessor, c chan *[]Stat) {
-	tick := time.Tick(1 * time.Second)
+func StatProcessor(processor ResultProcessor, interval time.Duration, c chan *[]Stat) {
+	tick := time.Tick(interval * time.Second)
 	for {
 		select {
 		case <-tick:
@@ -20,8 +23,7 @@ func StatProcessor(processor ResultProcessor, c chan *[]Stat) {
 			if err == nil {
 				c <- &d
 			} else {
-				// TODO: Dont Panic!
-				panic(err)
+				log.Println(err)
 			}
 		}
 	}

@@ -52,7 +52,6 @@ func processStatLine(data []string) (core.Stat, int) {
 func (cp CpuProcessor) Process() ([]core.Stat, error) {
 	data, err := cp.rr.Read()
 	if err != nil {
-		// errors may happen...
 		return nil, err
 	}
 	result := []core.Stat{}
