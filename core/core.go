@@ -7,7 +7,7 @@ import (
 
 type Stat struct {
 	Type   string
-	Values []int64
+	Values []int
 }
 
 type ResultProcessor interface {

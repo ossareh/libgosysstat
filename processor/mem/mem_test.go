@@ -21,11 +21,11 @@ func TestMemProcessor(t *testing.T) {
 	}
 	results, _ := proc.Process()
 	known := []core.Stat{
-		core.Stat{"total", []int64{24684748}},
-		core.Stat{"used", []int64{4749476}},
-		core.Stat{"cached", []int64{}},
-		core.Stat{"swap_total", []int64{}},
-		core.Stat{"swap_free", []int64{}},
+		core.Stat{"total", []int{24684748}},
+		core.Stat{"used", []int{4749476}},
+		core.Stat{"cached", []int{1919332}},
+		core.Stat{"swap_total", []int{0}},
+		core.Stat{"swap_free", []int{0}},
 	}
 
 	if len(known) != len(results) {

@@ -10,21 +10,21 @@ type MemProcessor struct {
 	rr *reader.ResettingReader
 }
 
-func processStatLine(data []string, memTotal, swapTotal int64) (core.Stat, int) {
+func processStatLine(data []string, memTotal, swapTotal int) (core.Stat, int) {
 	var res core.Stat
 	switch data[0] {
 	case "MemTotal:":
-		res = core.Stat{"total", []int64{processor.Stoi64(data[1])}}
+		res = core.Stat{"total", []int{processor.Stoi(data[1])}}
 	case "MemFree:":
-		used := memTotal - processor.Stoi64(data[1])
-		res = core.Stat{"used", []int64{used}}
+		used := memTotal - processor.Stoi(data[1])
+		res = core.Stat{"used", []int{used}}
 	case "Cached:":
-		res = core.Stat{"cached", []int64{processor.Stoi64(data[1])}}
+		res = core.Stat{"cached", []int{processor.Stoi(data[1])}}
 	case "SwapTotal:":
-		res = core.Stat{"swap_total", []int64{processor.Stoi64(data[1])}}
+		res = core.Stat{"swap_total", []int{processor.Stoi(data[1])}}
 	case "SwapFree:":
-		used := swapTotal - processor.Stoi64(data[1])
-		res = core.Stat{"swap_free", []int64{used}}
+		used := swapTotal - processor.Stoi(data[1])
+		res = core.Stat{"swap_free", []int{used}}
 	default:
 		return res, processor.SKIP
 	}
@@ -38,7 +38,7 @@ func (mp *MemProcessor) Process() ([]core.Stat, error) {
 		return nil, err
 	}
 	result := []core.Stat{}
-	var memTotal, swapTotal int64
+	var memTotal, swapTotal int
 	for _, d := range data {
 		if len(d) > 0 {
 			r, state := processStatLine(d, memTotal, swapTotal)

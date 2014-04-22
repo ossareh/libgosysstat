@@ -12,13 +12,13 @@ type CpuProcessor struct {
 	rr *reader.ResettingReader
 }
 
-func makeCpuStat(data []string) []int64 {
-	return []int64{
-		processor.Stoi64(data[0]), // user
-		processor.Stoi64(data[1]), // nice
-		processor.Stoi64(data[2]), // sys
-		processor.Stoi64(data[3]), // idle
-		processor.Stoi64(data[4]), // io
+func makeCpuStat(data []string) []int {
+	return []int{
+		processor.Stoi(data[0]), // user
+		processor.Stoi(data[1]), // nice
+		processor.Stoi(data[2]), // sys
+		processor.Stoi(data[3]), // idle
+		processor.Stoi(data[4]), // io
 	}
 }
 
@@ -28,15 +28,15 @@ func processStatLine(data []string) (core.Stat, int) {
 	case "cpu":
 		res = core.Stat{"total", makeCpuStat(data[1:6])}
 	case "intr":
-		res = core.Stat{"intr", []int64{processor.Stoi64(data[1])}}
+		res = core.Stat{"intr", []int{processor.Stoi(data[1])}}
 	case "ctxt":
-		res = core.Stat{"ctxt", []int64{processor.Stoi64(data[1])}}
+		res = core.Stat{"ctxt", []int{processor.Stoi(data[1])}}
 	case "processes":
-		res = core.Stat{"procs", []int64{processor.Stoi64(data[1])}}
+		res = core.Stat{"procs", []int{processor.Stoi(data[1])}}
 	case "procs_running":
-		res = core.Stat{"procsr", []int64{processor.Stoi64(data[1])}}
+		res = core.Stat{"procsr", []int{processor.Stoi(data[1])}}
 	case "procs_blocked":
-		res = core.Stat{"procsb", []int64{processor.Stoi64(data[1])}}
+		res = core.Stat{"procsb", []int{processor.Stoi(data[1])}}
 	default:
 		if data[0][0:3] == "cpu" {
 			if cpuN := strings.Split(data[0], "cpu")[1]; cpuN != "" {
