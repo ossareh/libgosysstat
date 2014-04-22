@@ -31,20 +31,20 @@ func TestCpuProcessor(t *testing.T) {
 	}
 	results, _ := proc.Process()
 	known := []core.Stat{
-		core.Stat{"total", []int{488210, 553716, 185158, 155133921, 352874}},
-		core.Stat{"0", []int{94569, 68276, 55416, 18892780, 317626}},
-		core.Stat{"1", []int{89363, 70644, 31545, 19393879, 15210}},
-		core.Stat{"2", []int{88559, 71599, 27731, 19410267, 6418}},
-		core.Stat{"3", []int{86345, 72636, 26398, 19414920, 4139}},
-		core.Stat{"4", []int{33012, 65906, 12119, 19503394, 2521}},
-		core.Stat{"5", []int{33579, 67627, 10803, 19505022, 2238}},
-		core.Stat{"6", []int{31831, 68442, 10736, 19506646, 1844}},
-		core.Stat{"7", []int{30947, 68582, 10405, 19507011, 2872}},
-		core.Stat{"intr", []int{122368175}},
-		core.Stat{"ctxt", []int{217868872}},
-		core.Stat{"procs", []int{6704}},
-		core.Stat{"procsr", []int{1}},
-		core.Stat{"procsb", []int{0}},
+		&TotalCpuStat{&CpuStat{488210, 553716, 185158, 155133921, 352874}},
+		&CpuInstanceStat{0, &CpuStat{94569, 68276, 55416, 18892780, 317626}},
+		&CpuInstanceStat{1, &CpuStat{89363, 70644, 31545, 19393879, 15210}},
+		&CpuInstanceStat{2, &CpuStat{88559, 71599, 27731, 19410267, 6418}},
+		&CpuInstanceStat{3, &CpuStat{86345, 72636, 26398, 19414920, 4139}},
+		&CpuInstanceStat{4, &CpuStat{33012, 65906, 12119, 19503394, 2521}},
+		&CpuInstanceStat{5, &CpuStat{33579, 67627, 10803, 19505022, 2238}},
+		&CpuInstanceStat{6, &CpuStat{31831, 68442, 10736, 19506646, 1844}},
+		&CpuInstanceStat{7, &CpuStat{30947, 68582, 10405, 19507011, 2872}},
+		&SingleIntStat{"intr", 122368175},
+		&SingleIntStat{"ctxt", 217868872},
+		&SingleIntStat{"procs", 6704},
+		&SingleIntStat{"procsr", 1},
+		&SingleIntStat{"procsb", 0},
 	}
 
 	if len(known) != len(results) {
@@ -52,14 +52,14 @@ func TestCpuProcessor(t *testing.T) {
 	}
 
 	for idx, stat := range known {
-		if stat.Type != results[idx].Type {
-			t.Fatalf("Stat Type mismatch", stat.Type, results[idx].Type)
+		if stat.Type() != results[idx].Type() {
+			t.Fatalf("Stat Type mismatch", stat.Type(), results[idx].Type())
 		}
-		for subIdx, val := range stat.Values {
-			if val != results[idx].Values[subIdx] {
+		for subIdx, val := range stat.Values() {
+			if val != results[idx].Values()[subIdx] {
 				s := fmt.Sprintf("Stat Value mismatch (item:%d, val:%d)",
 					idx, subIdx)
-				t.Fatalf(s, val, results[idx].Values[subIdx])
+				t.Fatalf(s, val, results[idx].Values()[subIdx])
 			}
 		}
 	}

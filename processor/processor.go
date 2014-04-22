@@ -7,12 +7,6 @@ import (
 	"github.com/ossareh/gosysstat/core"
 )
 
-const (
-	CONTINUE = iota
-	SKIP
-	STOP
-)
-
 type Processor interface {
 	Process() ([]core.Stat, error)
 }

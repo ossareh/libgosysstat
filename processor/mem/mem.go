@@ -6,30 +6,40 @@ import (
 	"github.com/ossareh/gosysstat/processor"
 )
 
+type MemStat struct {
+	region string
+	value  int
+}
+
+func (m *MemStat) Type() string {
+	return m.region
+}
+
+func (m *MemStat) Values() []int {
+	return []int{m.value}
+}
+
 type MemProcessor struct {
 	rr *reader.ResettingReader
 }
 
-func processStatLine(data []string, memTotal, swapTotal int) (core.Stat, int) {
-	var res core.Stat
+func processStatLine(data []string, memTotal, swapTotal int) *MemStat {
 	switch data[0] {
 	case "MemTotal:":
-		res = core.Stat{"total", []int{processor.Stoi(data[1])}}
+		return &MemStat{"total", processor.Stoi(data[1])}
 	case "MemFree:":
 		used := memTotal - processor.Stoi(data[1])
-		res = core.Stat{"used", []int{used}}
+		return &MemStat{"used", used}
 	case "Cached:":
-		res = core.Stat{"cached", []int{processor.Stoi(data[1])}}
+		return &MemStat{"cached", processor.Stoi(data[1])}
 	case "SwapTotal:":
-		res = core.Stat{"swap_total", []int{processor.Stoi(data[1])}}
+		return &MemStat{"swap_total", processor.Stoi(data[1])}
 	case "SwapFree:":
 		used := swapTotal - processor.Stoi(data[1])
-		res = core.Stat{"swap_free", []int{used}}
+		return &MemStat{"swap_free", used}
 	default:
-		return res, processor.SKIP
+		return nil
 	}
-	return res, processor.CONTINUE
-
 }
 
 func (mp *MemProcessor) Process() ([]core.Stat, error) {
@@ -41,13 +51,13 @@ func (mp *MemProcessor) Process() ([]core.Stat, error) {
 	var memTotal, swapTotal int
 	for _, d := range data {
 		if len(d) > 0 {
-			r, state := processStatLine(d, memTotal, swapTotal)
-			if state != processor.SKIP {
-				switch r.Type {
+			r := processStatLine(d, memTotal, swapTotal)
+			if r != nil {
+				switch r.region {
 				case "total":
-					memTotal = r.Values[0]
+					memTotal = r.value
 				case "swap_total":
-					swapTotal = r.Values[0]
+					swapTotal = r.value
 				}
 				result = append(result, r)
 			}

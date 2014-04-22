@@ -21,11 +21,11 @@ func TestMemProcessor(t *testing.T) {
 	}
 	results, _ := proc.Process()
 	known := []core.Stat{
-		core.Stat{"total", []int{24684748}},
-		core.Stat{"used", []int{4749476}},
-		core.Stat{"cached", []int{1919332}},
-		core.Stat{"swap_total", []int{0}},
-		core.Stat{"swap_free", []int{0}},
+		&MemStat{"total", 24684748},
+		&MemStat{"used", 4749476},
+		&MemStat{"cached", 1919332},
+		&MemStat{"swap_total", 0},
+		&MemStat{"swap_free", 0},
 	}
 
 	if len(known) != len(results) {
@@ -33,14 +33,14 @@ func TestMemProcessor(t *testing.T) {
 	}
 
 	for idx, stat := range known {
-		if stat.Type != results[idx].Type {
-			t.Fatalf("Stat Type mismatch", stat.Type, results[idx].Type)
+		if stat.Type() != results[idx].Type() {
+			t.Fatalf("Stat Type mismatch", stat.Type(), results[idx].Type())
 		}
-		for subIdx, val := range stat.Values {
-			if val != results[idx].Values[subIdx] {
+		for subIdx, val := range stat.Values() {
+			if val != results[idx].Values()[subIdx] {
 				s := fmt.Sprintf("Stat Value mismatch (item:%d, val:%d)",
 					idx, subIdx)
-				t.Fatalf(s, val, results[idx].Values[subIdx])
+				t.Fatalf(s, val, results[idx].Values()[subIdx])
 			}
 		}
 	}
