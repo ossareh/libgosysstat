@@ -1,7 +1,7 @@
 package mem
 
 import (
-	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/ossareh/gosysstat/core"
@@ -28,20 +28,7 @@ func TestMemProcessor(t *testing.T) {
 		&MemStat{"swap_free", 0},
 	}
 
-	if len(known) != len(results) {
-		t.Fatalf("Expected same number of results", len(known), len(results))
-	}
-
-	for idx, stat := range known {
-		if stat.Type() != results[idx].Type() {
-			t.Fatalf("Stat Type mismatch", stat.Type(), results[idx].Type())
-		}
-		for subIdx, val := range stat.Values() {
-			if val != results[idx].Values()[subIdx] {
-				s := fmt.Sprintf("Stat Value mismatch (item:%d, val:%d)",
-					idx, subIdx)
-				t.Fatalf(s, val, results[idx].Values()[subIdx])
-			}
-		}
+	if !reflect.DeepEqual(known, results) {
+		t.Fatalf("Expected matching results", known, results)
 	}
 }
