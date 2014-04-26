@@ -1,19 +1,35 @@
 package reader
 
-import "testing"
+import (
+	"os"
+	"reflect"
+	"testing"
+)
 
-func TestOpeningInvalidResettingReader(t *testing.T) {
-	_, err := Open("./doesnotexist")
-	if err == nil {
-		t.Fatalf("Expecting to not file file")
+func TestTokenize(t *testing.T) {
+	bytes := make([][]byte, 5)
+	bytes[0] = []byte{'a', 'l', 'i', 'c', 'e'}
+	bytes[1] = []byte{'a', 'l', 'i', 'c', 'e', '\n'}
+	bytes[2] = []byte{'a', 'l', 'i', 'c', 'e', '\n', ' '}
+	bytes[3] = []byte{'a', 'l', 'i', 'c', 'e', ' ', '\n'}
+	bytes[4] = []byte{'a', 'l', 'i', 'c', 'e', ' ', ' '}
+
+	expected := []string{"alice"}
+
+	for idx, b := range bytes {
+		result := tokenize(b)[0]
+		if !reflect.DeepEqual(expected, result) {
+			t.Fatalf("Expected %s got %s, element %d", expected, result, idx)
+		}
 	}
 }
 
 func TestResettingReader(t *testing.T) {
-	rr, err := Open("./example.sample")
+	file, err := os.Open("./example.sample")
 	if err != nil {
 		t.Fatalf("Expecting to find sample file", err)
 	}
+	rr := NewResettingReader(file)
 	defer rr.Close()
 	known := [][]string{
 		[]string{"foo", "bar", "baz"},
@@ -23,19 +39,8 @@ func TestResettingReader(t *testing.T) {
 	firstRun, _ := rr.Read()
 	secondRun, _ := rr.Read()
 
-	if len(known) != len(firstRun) || len(known) != len(secondRun) {
-		t.Fatal("Excepting results to be same length")
-	}
-
-	for idx, row := range known {
-		for subIdx, col := range row {
-			if col != firstRun[idx][subIdx] ||
-				col != secondRun[idx][subIdx] {
-				t.Fatalf("Expecting results to be the same",
-					col,
-					firstRun[idx][subIdx],
-					secondRun[idx][subIdx])
-			}
-		}
+	if !reflect.DeepEqual(known, firstRun) ||
+		!reflect.DeepEqual(known, secondRun) {
+		t.Fatalf("Expected results to be the same", known, firstRun, secondRun)
 	}
 }

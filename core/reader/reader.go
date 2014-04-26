@@ -2,74 +2,79 @@ package reader
 
 import (
 	"io"
-	"os"
+	"io/ioutil"
 )
+
+const INITIAL_ROWS = 1
 
 const (
-	INITIAL_ROWS  = 1
-	INITIAL_SLICE = 512
+	SCAN_START = iota // looking for non-whitespace
+	SCAN_END
 )
 
-type ResettingReader struct {
-	fh *os.File
+type DataSource interface {
+	io.ReadSeeker
+	io.Closer
 }
 
-func tokenize(bytes []byte) [][]string {
-	var row, start int
+type ResettingReader struct {
+	src DataSource
+}
+
+func isWhiteSpace(b byte) bool {
+	return (b == '\n' || b == '\r' || b == '\t' || b == ' ')
+}
+
+func tokenize(bs []byte) [][]string {
 	rows := make([][]string, INITIAL_ROWS)
+	var row, startPos int
 	rows[row] = []string{}
-	for idx, b := range bytes {
-		// skip forwards if we're just finding whitespace
-		if idx == start && b == ' ' {
-			start = idx + 1
-			continue
+
+	state := SCAN_START
+	for pos, b := range bs {
+		if state == SCAN_START && isWhiteSpace(b) {
+			// intentionally left blank
 		}
 
-		// handle case where last line does not end with a new line
-		if idx == len(bytes)-1 {
-			idx = len(bytes)
+		if state == SCAN_START && !isWhiteSpace(b) {
+			startPos = pos
+			state = SCAN_END
 		}
 
-		// normal case, hit a space or new line, add to rows
-		if b == ' ' || b == '\n' || idx == len(bytes) {
-			rows[row] = append(rows[row], string(bytes[start:idx]))
-			start = idx + 1
+		if state == SCAN_END && !isWhiteSpace(b) {
+			// handle case where this is the last value in the array
+			if pos == len(bs)-1 {
+				rows[row] = append(rows[row], string(bs[startPos:pos+1]))
+			}
 		}
 
-		// If we're looking at a new line, prep the next row
+		if state == SCAN_END && isWhiteSpace(b) {
+			rows[row] = append(rows[row], string(bs[startPos:pos]))
+			state = SCAN_START
+		}
+
 		if b == '\n' {
 			row++
 			rows = append(rows, []string{})
 		}
 	}
+
 	return rows
 }
 
 func (rr *ResettingReader) Read() ([][]string, error) {
-	rr.fh.Seek(0, 0)
-	allBytes := []byte{}
-	tmpBytes := make([]byte, INITIAL_SLICE)
-	for {
-		read, err := rr.fh.Read(tmpBytes)
-		if err != nil && err != io.EOF {
-			return nil, err
-		}
-		if read > 0 {
-			allBytes = append(allBytes, tmpBytes[0:read]...)
-		} else {
-			return tokenize(allBytes), nil
-		}
-	}
-}
-
-func (rr *ResettingReader) Close() error {
-	return rr.fh.Close()
-}
-
-func Open(filename string) (*ResettingReader, error) {
-	file, err := os.Open(filename)
+	rr.src.Seek(0, 0)
+	bs, err := ioutil.ReadAll(rr.src)
 	if err != nil {
 		return nil, err
 	}
-	return &ResettingReader{file}, nil
+	return tokenize(bs), nil
+}
+
+func (rr *ResettingReader) Close() error {
+	return rr.src.Close()
+}
+
+func NewResettingReader(src DataSource) *ResettingReader {
+	return &ResettingReader{src}
 }
