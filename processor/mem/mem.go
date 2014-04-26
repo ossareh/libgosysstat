@@ -1,6 +1,8 @@
 package mem
 
 import (
+	"os"
+
 	"github.com/ossareh/gosysstat/core"
 	"github.com/ossareh/gosysstat/core/reader"
 	"github.com/ossareh/gosysstat/processor"
@@ -67,9 +69,9 @@ func (mp *MemProcessor) Process() ([]core.Stat, error) {
 }
 
 func NewProcessor(filename string) (processor.Processor, error) {
-	rr, err := reader.Open(filename)
+	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	return &MemProcessor{rr}, nil
+	return &MemProcessor{reader.NewResettingReader(file)}, nil
 }
