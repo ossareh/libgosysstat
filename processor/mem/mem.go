@@ -1,8 +1,6 @@
 package mem
 
 import (
-	"os"
-
 	"github.com/ossareh/gosysstat/core"
 	"github.com/ossareh/gosysstat/core/reader"
 	"github.com/ossareh/gosysstat/processor"
@@ -10,34 +8,34 @@ import (
 
 type MemStat struct {
 	region string
-	value  int
+	value  float64
 }
 
 func (m *MemStat) Type() string {
 	return m.region
 }
 
-func (m *MemStat) Values() []int {
-	return []int{m.value}
+func (m *MemStat) Values() []float64 {
+	return []float64{m.value}
 }
 
 type MemProcessor struct {
 	rr *reader.ResettingReader
 }
 
-func processStatLine(data []string, memTotal, swapTotal int) *MemStat {
+func processStatLine(data []string, memTotal, swapTotal float64) *MemStat {
 	switch data[0] {
 	case "MemTotal:":
-		return &MemStat{"total", processor.Stoi(data[1])}
+		return &MemStat{"total", processor.Atof(data[1])}
 	case "MemFree:":
-		used := memTotal - processor.Stoi(data[1])
+		used := memTotal - processor.Atof(data[1])
 		return &MemStat{"used", used}
 	case "Cached:":
-		return &MemStat{"cached", processor.Stoi(data[1])}
+		return &MemStat{"cached", processor.Atof(data[1])}
 	case "SwapTotal:":
-		return &MemStat{"swap_total", processor.Stoi(data[1])}
+		return &MemStat{"swap_total", processor.Atof(data[1])}
 	case "SwapFree:":
-		used := swapTotal - processor.Stoi(data[1])
+		used := swapTotal - processor.Atof(data[1])
 		return &MemStat{"swap_free", used}
 	default:
 		return nil
@@ -50,7 +48,7 @@ func (mp *MemProcessor) Process() ([]core.Stat, error) {
 		return nil, err
 	}
 	result := []core.Stat{}
-	var memTotal, swapTotal int
+	var memTotal, swapTotal float64
 	for _, d := range data {
 		if len(d) > 0 {
 			r := processStatLine(d, memTotal, swapTotal)
@@ -68,10 +66,6 @@ func (mp *MemProcessor) Process() ([]core.Stat, error) {
 	return result, nil
 }
 
-func NewProcessor(filename string) (processor.Processor, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	return &MemProcessor{reader.NewResettingReader(file)}, nil
+func NewProcessor(src reader.DataSource) processor.Processor {
+	return &MemProcessor{reader.NewResettingReader(src)}
 }

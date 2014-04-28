@@ -1,34 +1,25 @@
 package cpu
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/ossareh/gosysstat/core"
+	lt "github.com/ossareh/gosysstat/processor/testing"
 )
 
-func TestInvalidCpuProcessor(t *testing.T) {
-	_, err := NewProcessor("./idontexist")
-	if err == nil {
-		t.Fatalf("Expected failure opening file", err)
-	}
-}
-
-func makeCpuMap(user, nice, sys, idle, io int) map[string]int {
-	return map[string]int{
-		"user": user,
-		"nice": nice,
-		"sys":  sys,
-		"idle": idle,
-		"io":   io,
-	}
-}
-
 func TestCpuProcessor(t *testing.T) {
-	proc, err := NewProcessor("./proc_stat.example")
+	th, err := lt.MakeTestHarness("./proc_stat.example")
 	if err != nil {
-		t.Fatalf("Expected to be able to open example file")
+		t.Fatalf(err.Error())
 	}
+	proc := NewProcessor(th)
+	defer th.Close()
+	/*if err := th.replaceFileHandle("./cpu_sample_two"); err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer th.Close()*/
 	results, _ := proc.Process()
 	known := []core.Stat{
 		&TotalCpuStat{&CpuStat{488210, 553716, 185158, 155133921, 352874}},
@@ -40,14 +31,40 @@ func TestCpuProcessor(t *testing.T) {
 		&CpuInstanceStat{5, &CpuStat{33579, 67627, 10803, 19505022, 2238}},
 		&CpuInstanceStat{6, &CpuStat{31831, 68442, 10736, 19506646, 1844}},
 		&CpuInstanceStat{7, &CpuStat{30947, 68582, 10405, 19507011, 2872}},
-		&SingleIntStat{"intr", 122368175},
-		&SingleIntStat{"ctxt", 217868872},
-		&SingleIntStat{"procs", 6704},
-		&SingleIntStat{"procsr", 1},
-		&SingleIntStat{"procsb", 0},
+		&SingleStat{"intr", 122368175},
+		&SingleStat{"ctxt", 217868872},
+		&SingleStat{"procs", 6704},
+		&SingleStat{"procsr", 1},
+		&SingleStat{"procsb", 0},
 	}
 
 	if !reflect.DeepEqual(known, results) {
 		t.Fatalf("Expected matching results", known, results)
+	}
+}
+
+func TestCpuStatSubtract(t *testing.T) {
+	firstSample := &CpuStat{10, 10, 10, 50, 10}
+	secondSample := &CpuStat{21, 10, 16, 142, 20}
+	result := secondSample.Subtract(firstSample)
+	e := "0.09"
+	if r := fmt.Sprintf("%.2f", result.user); r != e {
+		t.Fatalf("Expected %d got %s", e, r)
+	}
+	e = "0.00"
+	if r := fmt.Sprintf("%.2f", result.nice); r != e {
+		t.Fatalf("Expected %d got %s", e, r)
+	}
+	e = "0.05"
+	if r := fmt.Sprintf("%.2f", result.sys); r != e {
+		t.Fatalf("Expected %d got %s", e, r)
+	}
+	e = "0.77"
+	if r := fmt.Sprintf("%.2f", result.idle); r != e {
+		t.Fatalf("Expected %d got %s", e, r)
+	}
+	e = "0.08"
+	if r := fmt.Sprintf("%.2f", result.io); r != e {
+		t.Fatalf("Expected %d got %s", e, r)
 	}
 }

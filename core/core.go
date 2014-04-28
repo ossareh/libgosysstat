@@ -7,7 +7,7 @@ import (
 
 type Stat interface {
 	Type() string
-	Values() []int
+	Values() []float64
 }
 
 type ResultProcessor interface {
@@ -20,10 +20,11 @@ func StatProcessor(processor ResultProcessor, interval time.Duration, c chan []S
 		select {
 		case <-tick:
 			d, err := processor.Process()
-			if err == nil {
-				c <- d
-			} else {
+			if err != nil {
 				log.Println(err)
+			}
+			if d != nil {
+				c <- d
 			}
 		}
 	}

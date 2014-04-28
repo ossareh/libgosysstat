@@ -5,20 +5,20 @@ import (
 	"testing"
 
 	"github.com/ossareh/gosysstat/core"
+	lt "github.com/ossareh/gosysstat/processor/testing"
 )
 
-func TestInvalidMemProcessor(t *testing.T) {
-	_, err := NewProcessor("./idontexist")
-	if err == nil {
-		t.Fatalf("Expected failure opening file", err)
-	}
-}
-
 func TestMemProcessor(t *testing.T) {
-	proc, err := NewProcessor("./proc_meminfo.example")
+	th, err := lt.MakeTestHarness("./proc_meminfo.example")
 	if err != nil {
-		t.Fatalf("Expected to be able to open example file")
+		t.Fatalf(err.Error())
 	}
+	proc := NewProcessor(th)
+	defer th.Close()
+	/*if err := th.replaceFileHandle("./proc_meminfo.example2"); err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer th.Close()*/
 	results, _ := proc.Process()
 	known := []core.Stat{
 		&MemStat{"total", 24684748},

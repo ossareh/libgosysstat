@@ -3,16 +3,31 @@ package cpu
 import (
 	"strconv"
 
-	"github.com/ossareh/gosysstat/core/reader"
 	"github.com/ossareh/gosysstat/processor"
 )
 
 type CpuStat struct {
-	user int
-	nice int
-	sys  int
-	idle int
-	io   int
+	user float64
+	nice float64
+	sys  float64
+	idle float64
+	io   float64
+}
+
+func (cs *CpuStat) Subtract(previous *CpuStat) *CpuStat {
+	user := cs.user - previous.user
+	nice := cs.nice - previous.nice
+	sys := cs.sys - previous.sys
+	idle := cs.idle - previous.idle
+	io := cs.io - previous.io
+	total := user + nice + sys + idle + io
+	return &CpuStat{
+		user / total,
+		nice / total,
+		sys / total,
+		idle / total,
+		io / total,
+	}
 }
 
 type TotalCpuStat struct {
@@ -23,8 +38,8 @@ func (t *TotalCpuStat) Type() string {
 	return "total"
 }
 
-func (t *TotalCpuStat) Values() []int {
-	return []int{
+func (t *TotalCpuStat) Values() []float64 {
+	return []float64{
 		t.stats.user,
 		t.stats.nice,
 		t.stats.sys,
@@ -42,8 +57,8 @@ func (t *CpuInstanceStat) Type() string {
 	return strconv.Itoa(t.cpuInstance)
 }
 
-func (t *CpuInstanceStat) Values() []int {
-	return []int{
+func (t *CpuInstanceStat) Values() []float64 {
+	return []float64{
 		t.stats.user,
 		t.stats.nice,
 		t.stats.sys,
@@ -52,29 +67,25 @@ func (t *CpuInstanceStat) Values() []int {
 	}
 }
 
-type SingleIntStat struct {
+type SingleStat struct {
 	kind  string
-	value int
+	value float64
 }
 
-func (s *SingleIntStat) Type() string {
+func (s *SingleStat) Type() string {
 	return s.kind
 }
 
-func (s *SingleIntStat) Values() []int {
-	return []int{s.value}
-}
-
-type CpuProcessor struct {
-	rr *reader.ResettingReader
+func (s *SingleStat) Values() []float64 {
+	return []float64{s.value}
 }
 
 func makeCpuStat(data []string) *CpuStat {
 	return &CpuStat{
-		processor.Stoi(data[0]), // user
-		processor.Stoi(data[1]), // nice
-		processor.Stoi(data[2]), // sys
-		processor.Stoi(data[3]), // idle
-		processor.Stoi(data[4]), // io
+		processor.Atof(data[0]), // user
+		processor.Atof(data[1]), // nice
+		processor.Atof(data[2]), // sys
+		processor.Atof(data[3]), // idle
+		processor.Atof(data[4]), // io
 	}
 }

@@ -11,8 +11,8 @@ type Processor interface {
 	Process() ([]core.Stat, error)
 }
 
-func Stoi(s string) int {
-	i, err := strconv.Atoi(s)
+func Atof(s string) float64 {
+	i, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		log.Println(err.Error())
 		return 0
