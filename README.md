@@ -17,22 +17,27 @@ Mental Model
      | main |
      +------+
         |
-        |-- core.StatProcessor(cpu.NewProcessor(filename), chan)
-        |-- core.StatProcessor(ram.NewProcessor(filename), chan)
-        |-- core.StatProcessor(dsk.NewProcessor(filename), chan)
+        |-- cpuFh = os.Open("/proc/stat")
+        |-- core.StatProcessor(cpu.NewProcessor(cpuFh), chan)
+        |
+        |-- memFh = os.Open("/proc/meminfo")
+        |-- core.StatProcessor(ram.NewProcessor(memFh), chan)
+        |
+        |-- core.StatProcessor(dsk.NewProcessor(), chan)
         |            // disk io?, disk storage?
-        |-- core.StatProcessor(net.NewProcessor(filename), chan)
+        |
+        |-- core.StatProcessor(net.NewProcessor(), chan)
         |            // does this use the /proc fs?
     +-----------+
     | processor |- StatProcessor(statProcessor, chan)
     +-----------+
         |-- Process() -> []core.Stat{}
     +-----------------+
-    | ResettingReader | Open(filename)
+    | ResettingReader | Open(reader.DataSource)
     +-----------------+ 
         |-- Read() -> [][]string
     +---------+
-    | io.File | Open(filename)
+    | io.File |
     +---------+
         |-- Seek()
         \-- Read()
