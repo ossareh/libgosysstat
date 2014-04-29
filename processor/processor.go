@@ -4,7 +4,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/ossareh/gosysstat/core"
+	"github.com/ossareh/libgosysstat/core"
 )
 
 type Processor interface {

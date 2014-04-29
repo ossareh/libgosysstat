@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ossareh/gosysstat/core"
-	lt "github.com/ossareh/gosysstat/processor/testing"
+	"github.com/ossareh/libgosysstat/core"
+	lt "github.com/ossareh/libgosysstat/processor/testing"
 )
 
 func TestMemProcessor(t *testing.T) {

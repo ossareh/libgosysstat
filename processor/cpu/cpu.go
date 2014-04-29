@@ -3,7 +3,7 @@ package cpu
 import (
 	"strconv"
 
-	"github.com/ossareh/gosysstat/processor"
+	"github.com/ossareh/libgosysstat/processor"
 )
 
 type CpuStat struct {

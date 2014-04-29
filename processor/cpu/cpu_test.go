@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ossareh/gosysstat/core"
-	lt "github.com/ossareh/gosysstat/processor/testing"
+	"github.com/ossareh/libgosysstat/core"
+	lt "github.com/ossareh/libgosysstat/processor/testing"
 )
 
 func TestCpuProcessor(t *testing.T) {
@@ -33,7 +33,7 @@ func TestCpuProcessor(t *testing.T) {
 		&CpuInstanceStat{7, &CpuStat{0.04485219164118247, 0, 0.059123343527013254, 0.8960244648318043, 0}},
 		&SingleStat{"intr", 155844},
 		&SingleStat{"ctxt", 1346187},
-		&SingleStat{"procs", 84711},
+		&SingleStat{"procs", 3},
 		&SingleStat{"procsr", 1},
 		&SingleStat{"procsb", 0},
 	}

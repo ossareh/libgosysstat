@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ossareh/gosysstat/core"
-	"github.com/ossareh/gosysstat/core/reader"
-	"github.com/ossareh/gosysstat/processor"
+	"github.com/ossareh/libgosysstat/core"
+	"github.com/ossareh/libgosysstat/core/reader"
+	"github.com/ossareh/libgosysstat/processor"
 )
 
 type CpuProcessor struct {
