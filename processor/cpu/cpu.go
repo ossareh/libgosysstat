@@ -14,22 +14,6 @@ type CpuStat struct {
 	io   float64
 }
 
-func (cs *CpuStat) Subtract(previous *CpuStat) *CpuStat {
-	user := cs.user - previous.user
-	nice := cs.nice - previous.nice
-	sys := cs.sys - previous.sys
-	idle := cs.idle - previous.idle
-	io := cs.io - previous.io
-	total := user + nice + sys + idle + io
-	return &CpuStat{
-		user / total,
-		nice / total,
-		sys / total,
-		idle / total,
-		io / total,
-	}
-}
-
 type TotalCpuStat struct {
 	stats *CpuStat
 }

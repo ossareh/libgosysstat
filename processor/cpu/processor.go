@@ -3,21 +3,15 @@ package cpu
 import (
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/ossareh/gosysstat/core"
 	"github.com/ossareh/gosysstat/core/reader"
 	"github.com/ossareh/gosysstat/processor"
 )
 
-type ProcessResult struct {
-	result []core.Stat
-	when   time.Time
-}
-
 type CpuProcessor struct {
 	rr             *reader.ResettingReader
-	previousResult *ProcessResult
+	previousResult []core.Stat
 }
 
 func processStatLine(data []string) (core.Stat, error) {
@@ -68,17 +62,58 @@ func readStats(cp *CpuProcessor) ([]core.Stat, error) {
 	return result, nil
 }
 
+func cpuStatDelta(current, initial []float64) *CpuStat {
+	user := current[0] - initial[0]
+	nice := current[1] - initial[1]
+	sys := current[2] - initial[2]
+	idle := current[3] - initial[3]
+	io := current[4] - initial[4]
+	total := user + nice + sys + idle + io
+
+	return &CpuStat{
+		user / total,
+		nice / total,
+		sys / total,
+		idle / total,
+		io / total,
+	}
+}
+
 func (cp *CpuProcessor) Process() ([]core.Stat, error) {
-	rawStats, err := readStats(cp)
+	rawResult, err := readStats(cp)
 	if err != nil {
 		return nil, err
 	}
-	result := &ProcessResult{rawStats, time.Now()}
-	if cp.previousResult != nil {
-
+	if cp.previousResult == nil {
+		cp.previousResult = rawResult
+		return nil, nil
 	}
-	cp.previousResult = result
-	return rawStats, nil
+	computedResult := make([]core.Stat, len(rawResult))
+	for idx, res := range rawResult {
+		var stat core.Stat
+		prev := cp.previousResult[idx]
+		switch res.Type() {
+		case "total":
+			stat = &TotalCpuStat{cpuStatDelta(res.Values(), prev.Values())}
+		case "intr":
+			stat = &SingleStat{res.Type(), res.Values()[0] - prev.Values()[0]}
+		case "ctxt":
+			stat = &SingleStat{res.Type(), res.Values()[0] - prev.Values()[0]}
+		case "procs":
+			stat = &SingleStat{res.Type(), res.Values()[0] - prev.Values()[0]}
+		case "procsr":
+			stat = res
+		case "procsb":
+			stat = res
+		default:
+			// handling individual cores
+			i, _ := strconv.Atoi(res.Type())
+			stat = &CpuInstanceStat{i, cpuStatDelta(res.Values(), prev.Values())}
+		}
+		computedResult[idx] = stat
+	}
+	cp.previousResult = rawResult
+	return computedResult, nil
 }
 
 func NewProcessor(src reader.DataSource) processor.Processor {
