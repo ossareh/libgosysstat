@@ -6,12 +6,31 @@ import (
 	"github.com/ossareh/libgosysstat/processor"
 )
 
+const (
+	TOTAL         string = "total"
+	INTR                 = "intr"
+	CTXT                 = "ctxt"
+	PROCS                = "procs"
+	PROCS_RUNNING        = "procsr"
+	PROCS_BLOCKED        = "procsb"
+)
+
 type CpuStat struct {
-	user float64
-	nice float64
-	sys  float64
-	idle float64
-	io   float64
+	user uint64
+	nice uint64
+	sys  uint64
+	idle uint64
+	io   uint64
+}
+
+func (c *CpuStat) values() []uint64 {
+	return []uint64{
+		c.user,
+		c.nice,
+		c.sys,
+		c.idle,
+		c.io,
+	}
 }
 
 type TotalCpuStat struct {
@@ -19,17 +38,11 @@ type TotalCpuStat struct {
 }
 
 func (t *TotalCpuStat) Type() string {
-	return "total"
+	return TOTAL
 }
 
-func (t *TotalCpuStat) Values() []float64 {
-	return []float64{
-		t.stats.user,
-		t.stats.nice,
-		t.stats.sys,
-		t.stats.idle,
-		t.stats.io,
-	}
+func (t *TotalCpuStat) Values() []uint64 {
+	return t.stats.values()
 }
 
 type CpuInstanceStat struct {
@@ -41,35 +54,29 @@ func (t *CpuInstanceStat) Type() string {
 	return strconv.Itoa(t.cpuInstance)
 }
 
-func (t *CpuInstanceStat) Values() []float64 {
-	return []float64{
-		t.stats.user,
-		t.stats.nice,
-		t.stats.sys,
-		t.stats.idle,
-		t.stats.io,
-	}
+func (t *CpuInstanceStat) Values() []uint64 {
+	return t.stats.values()
 }
 
 type SingleStat struct {
 	kind  string
-	value float64
+	value uint64
 }
 
 func (s *SingleStat) Type() string {
 	return s.kind
 }
 
-func (s *SingleStat) Values() []float64 {
-	return []float64{s.value}
+func (s *SingleStat) Values() []uint64 {
+	return []uint64{s.value}
 }
 
 func makeCpuStat(data []string) *CpuStat {
 	return &CpuStat{
-		processor.Atof(data[0]), // user
-		processor.Atof(data[1]), // nice
-		processor.Atof(data[2]), // sys
-		processor.Atof(data[3]), // idle
-		processor.Atof(data[4]), // io
+		processor.Atoui64(data[0]), // user
+		processor.Atoui64(data[1]), // nice
+		processor.Atoui64(data[2]), // sys
+		processor.Atoui64(data[3]), // idle
+		processor.Atoui64(data[4]), // io
 	}
 }

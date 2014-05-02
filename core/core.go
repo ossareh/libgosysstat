@@ -7,7 +7,7 @@ import (
 
 type Stat interface {
 	Type() string
-	Values() []float64
+	Values() []uint64
 }
 
 type ResultProcessor interface {

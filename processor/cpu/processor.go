@@ -19,15 +19,15 @@ func processStatLine(data []string) (core.Stat, error) {
 	case "cpu":
 		return &TotalCpuStat{makeCpuStat(data[1:6])}, nil
 	case "intr":
-		return &SingleStat{"intr", processor.Atof(data[1])}, nil
+		return &SingleStat{INTR, processor.Atoui64(data[1])}, nil
 	case "ctxt":
-		return &SingleStat{"ctxt", processor.Atof(data[1])}, nil
+		return &SingleStat{CTXT, processor.Atoui64(data[1])}, nil
 	case "processes":
-		return &SingleStat{"procs", processor.Atof(data[1])}, nil
+		return &SingleStat{PROCS, processor.Atoui64(data[1])}, nil
 	case "procs_running":
-		return &SingleStat{"procsr", processor.Atof(data[1])}, nil
+		return &SingleStat{PROCS_RUNNING, processor.Atoui64(data[1])}, nil
 	case "procs_blocked":
-		return &SingleStat{"procsb", processor.Atof(data[1])}, nil
+		return &SingleStat{PROCS_BLOCKED, processor.Atoui64(data[1])}, nil
 	default:
 		if data[0][0:3] == "cpu" {
 			if cpuN := strings.Split(data[0], "cpu")[1]; cpuN != "" {
@@ -62,21 +62,14 @@ func readStats(cp *CpuProcessor) ([]core.Stat, error) {
 	return result, nil
 }
 
-func cpuStatDelta(current, initial []float64) *CpuStat {
+func cpuStatDelta(current, initial []uint64) *CpuStat {
 	user := current[0] - initial[0]
 	nice := current[1] - initial[1]
 	sys := current[2] - initial[2]
 	idle := current[3] - initial[3]
 	io := current[4] - initial[4]
-	total := user + nice + sys + idle + io
 
-	return &CpuStat{
-		user / total,
-		nice / total,
-		sys / total,
-		idle / total,
-		io / total,
-	}
+	return &CpuStat{user, nice, sys, idle, io}
 }
 
 func (cp *CpuProcessor) Process() ([]core.Stat, error) {
@@ -93,17 +86,17 @@ func (cp *CpuProcessor) Process() ([]core.Stat, error) {
 		var stat core.Stat
 		prev := cp.previousResult[idx]
 		switch res.Type() {
-		case "total":
+		case TOTAL:
 			stat = &TotalCpuStat{cpuStatDelta(res.Values(), prev.Values())}
-		case "intr":
+		case INTR:
 			stat = &SingleStat{res.Type(), res.Values()[0] - prev.Values()[0]}
-		case "ctxt":
+		case CTXT:
 			stat = &SingleStat{res.Type(), res.Values()[0] - prev.Values()[0]}
-		case "procs":
+		case PROCS:
 			stat = &SingleStat{res.Type(), res.Values()[0] - prev.Values()[0]}
-		case "procsr":
+		case PROCS_RUNNING:
 			stat = res
-		case "procsb":
+		case PROCS_BLOCKED:
 			stat = res
 		default:
 			// handling individual cores

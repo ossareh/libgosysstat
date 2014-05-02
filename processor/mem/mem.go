@@ -8,34 +8,34 @@ import (
 
 type MemStat struct {
 	region string
-	value  float64
+	value  uint64
 }
 
 func (m *MemStat) Type() string {
 	return m.region
 }
 
-func (m *MemStat) Values() []float64 {
-	return []float64{m.value}
+func (m *MemStat) Values() []uint64 {
+	return []uint64{m.value}
 }
 
 type MemProcessor struct {
 	rr *reader.ResettingReader
 }
 
-func processStatLine(data []string, memTotal, swapTotal float64) *MemStat {
+func processStatLine(data []string, memTotal, swapTotal uint64) *MemStat {
 	switch data[0] {
 	case "MemTotal:":
-		return &MemStat{"total", processor.Atof(data[1])}
+		return &MemStat{"total", processor.Atoui64(data[1])}
 	case "MemFree:":
-		used := memTotal - processor.Atof(data[1])
+		used := memTotal - processor.Atoui64(data[1])
 		return &MemStat{"used", used}
 	case "Cached:":
-		return &MemStat{"cached", processor.Atof(data[1])}
+		return &MemStat{"cached", processor.Atoui64(data[1])}
 	case "SwapTotal:":
-		return &MemStat{"swap_total", processor.Atof(data[1])}
+		return &MemStat{"swap_total", processor.Atoui64(data[1])}
 	case "SwapFree:":
-		used := swapTotal - processor.Atof(data[1])
+		used := swapTotal - processor.Atoui64(data[1])
 		return &MemStat{"swap_free", used}
 	default:
 		return nil
@@ -48,7 +48,7 @@ func (mp *MemProcessor) Process() ([]core.Stat, error) {
 		return nil, err
 	}
 	result := []core.Stat{}
-	var memTotal, swapTotal float64
+	var memTotal, swapTotal uint64
 	for _, d := range data {
 		if len(d) > 0 {
 			r := processStatLine(d, memTotal, swapTotal)
