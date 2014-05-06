@@ -36,7 +36,7 @@ func processStatLine(data []string, memTotal, swapTotal uint64) *MemStat {
 		return &MemStat{"swap_total", processor.Atoui64(data[1])}
 	case "SwapFree:":
 		used := swapTotal - processor.Atoui64(data[1])
-		return &MemStat{"swap_free", used}
+		return &MemStat{"swap_used", used}
 	default:
 		return nil
 	}

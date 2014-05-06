@@ -25,7 +25,7 @@ func TestMemProcessor(t *testing.T) {
 		&MemStat{"used", 4749476},
 		&MemStat{"cached", 1919332},
 		&MemStat{"swap_total", 0},
-		&MemStat{"swap_free", 0},
+		&MemStat{"swap_used", 0},
 	}
 
 	if !reflect.DeepEqual(known, results) {
