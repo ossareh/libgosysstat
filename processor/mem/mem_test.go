@@ -29,6 +29,6 @@ func TestMemProcessor(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(known, results) {
-		t.Fatalf("Expected matching results", known, results)
+		t.Fatal("Expected matching results", known, results)
 	}
 }

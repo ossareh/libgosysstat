@@ -1,0 +1,8 @@
+{
+	"ImportPath": "github.com/ossareh/libgosysstat",
+	"GoVersion": "go1.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": []
+}

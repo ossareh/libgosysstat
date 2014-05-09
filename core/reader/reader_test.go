@@ -27,7 +27,7 @@ func TestTokenize(t *testing.T) {
 func TestResettingReader(t *testing.T) {
 	file, err := os.Open("./example.sample")
 	if err != nil {
-		t.Fatalf("Expecting to find sample file", err)
+		t.Fatal("Expecting to find sample file", err)
 	}
 	rr := NewResettingReader(file)
 	defer rr.Close()
@@ -41,6 +41,6 @@ func TestResettingReader(t *testing.T) {
 
 	if !reflect.DeepEqual(known, firstRun) ||
 		!reflect.DeepEqual(known, secondRun) {
-		t.Fatalf("Expected results to be the same", known, firstRun, secondRun)
+		t.Fatal("Expected results to be the same", known, firstRun, secondRun)
 	}
 }
