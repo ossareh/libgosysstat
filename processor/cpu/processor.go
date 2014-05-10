@@ -109,8 +109,8 @@ func (cp *CpuProcessor) Process() ([]core.Stat, error) {
 	return computedResult, nil
 }
 
-func NewProcessor(src reader.DataSource) processor.Processor {
-	cp := &CpuProcessor{reader.NewResettingReader(src), nil}
+func New(src reader.DataSource) processor.Processor {
+	cp := &CpuProcessor{reader.New(src), nil}
 	cp.Process()
 	return cp
 }

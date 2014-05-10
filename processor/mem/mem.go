@@ -66,6 +66,6 @@ func (mp *MemProcessor) Process() ([]core.Stat, error) {
 	return result, nil
 }
 
-func NewProcessor(src reader.DataSource) processor.Processor {
-	return &MemProcessor{reader.NewResettingReader(src)}
+func New(src reader.DataSource) processor.Processor {
+	return &MemProcessor{reader.New(src)}
 }

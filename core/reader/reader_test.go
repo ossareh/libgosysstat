@@ -29,7 +29,7 @@ func TestResettingReader(t *testing.T) {
 	if err != nil {
 		t.Fatal("Expecting to find sample file", err)
 	}
-	rr := NewResettingReader(file)
+	rr := New(file)
 	defer rr.Close()
 	known := [][]string{
 		[]string{"foo", "bar", "baz"},

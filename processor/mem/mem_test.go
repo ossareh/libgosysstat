@@ -13,7 +13,7 @@ func TestMemProcessor(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	proc := NewProcessor(th)
+	proc := New(th)
 	defer th.Close()
 	/*if err := th.ReplaceFileHandle("./proc_meminfo.example2"); err != nil {
 		t.Fatalf(err.Error())

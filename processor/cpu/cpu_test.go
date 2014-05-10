@@ -13,7 +13,7 @@ func TestCpuProcessor(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	proc := NewProcessor(th)
+	proc := New(th)
 	th.Close()
 	if err := th.ReplaceFileHandle("./cpu_sample_two"); err != nil {
 		t.Fatalf(err.Error())

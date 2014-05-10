@@ -75,6 +75,6 @@ func (rr *ResettingReader) Close() error {
 	return rr.src.Close()
 }
 
-func NewResettingReader(src DataSource) *ResettingReader {
+func New(src DataSource) *ResettingReader {
 	return &ResettingReader{src}
 }
